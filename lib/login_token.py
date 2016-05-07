@@ -1,57 +1,46 @@
 import logging
+import rethinkdb as r
+from datetime import datetime
 
-import psycopg2
-import uuid
 logger = logging.getLogger('letSpotify.' + __name__)
+
+DB_NO_ERR_MSG = ""
+DB_DEFAULT_ERR_MSG = "Database Error"
 
 
 class LoginToken:
     def __init__(self, db):
         self.db = db
-
-    def check_token(self, data):
-        sql = "SELECT token, login, valid, fid, cookie FROM login_token WHERE token = %s;"
-        result = yield self.db.execute(sql, (data['token'],))
-        res = {}
-        flag = False
-        for i in result.fetchall():
-            if i:
-                res['token'] = i[0]
-                res['login'] = i[1]
-                res['valid'] = i[2]
-                res['fid'] = i[3]
-                res['cookie'] = i[4]
-                flag = True
-        if not flag:
-            return {}, False, "token not exist"
-        return res, True, ""
+        self.tk = r.table("login_tokens")
 
     def create_token(self):
-        token = str(uuid.uuid4())
-        sql = """
-               INSERT INTO login_token (token, login, valid, fid)
-               VALUES (%s, %s, %s, %s);
-               """
-        try:
-            result = yield self.db.execute(sql, (token,
-                                                 False,
-                                                 False,
-                                                 0,)
-                                           )
-            return token, True, ""
-        except psycopg2.IntegrityError:
-            return "", False, ""
+        payload = {
+            "login": False,
+            "valid": False,
+            "cookie": False,
+            "uid": "",
+            "timestamp": r.expr(datetime.now(r.make_timezone('+08:00')))
+        }
+        res = (yield self.tk.insert(payload).run(self.db))
+        if res['inserted'] == 1:
+            return res['generated_keys'][0], True, DB_NO_ERR_MSG
+        else:
+            return "", False, "Create Token Failed"
 
+    def get_token(self, data):
+        res = (yield self.tk.get(data['token']).run(self.db))
+        if res:
+            res.pop('timestamp')
+            return res, True, DB_NO_ERR_MSG
+        return {}, False, "No Token Found"
 
     def update_token(self, data):
-        sql = """UPDATE login_token SET (login, valid, fid, cookie) = (%s, %s, %s, %s) WHERE token = %s"""
-        try:
-            yield self.db.execute(sql, (data['login'],
-                                        data['valid'],
-                                        data['fid'],
-                                        data['cookie'],
-                                        data['token'],)
-                                  )
-        except:
-            return False, False, ""
-        return True, True, ""
+        res = (yield self.tk.get(data['token']).update(data).run(self.db))
+        if res['replaced']:
+            return {}, True, DB_NO_ERR_MSG
+        elif res['skipped']:
+            return {}, False, "No Token Found"
+        elif res['unchanged']:
+            return {}, False, "Data not changed"
+        else:
+            return {}, False, "Unexpected error"

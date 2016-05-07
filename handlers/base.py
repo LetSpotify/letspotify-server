@@ -1,5 +1,6 @@
 import json
 import logging
+import rethinkdb as r
 
 import tornado.web
 
@@ -8,9 +9,8 @@ logger = logging.getLogger('letSpotify.' + __name__)
 
 
 class BaseHandler(tornado.web.RequestHandler):
-    """A class to collect common handler methods - all other handlers should
-    subclass this one.
-    """
+    def initialize(self):
+        self.db = self.application.db
 
     def load_json(self):
         """Load JSON from the request body and store them in
@@ -82,7 +82,6 @@ class BaseHandler(tornado.web.RequestHandler):
         self.finish(json.dumps(res))
 
     def get_user(self):
-#        return 10208920449359360
         try:
             return self.get_secure_cookie("user").decode()
         except:
@@ -93,14 +92,10 @@ class BaseHandler(tornado.web.RequestHandler):
             self.finish(json.dumps(res))
             raise tornado.web.Finish()
 
-    def is_room_master(self, rid):
-#        return True
-        fid = self.get_user()
-        data = {
-            'rid': rid,
-            'fid': fid
-        }
-        master = yield from Service.rooms.is_room_master(data)
+    def is_room_master(self, data):
+        uid = self.get_user()
+        data['uid'] = uid
+        master = yield from Service.subscribes.is_room_master(data)
         if master:
             return True
         else:
@@ -111,14 +106,10 @@ class BaseHandler(tornado.web.RequestHandler):
             self.finish(json.dumps(res))
             raise tornado.web.Finish()
 
-    def is_room_subscriber(self, rid):
-#        return True
-        fid = self.get_user()
-        data = {
-            'rid': rid,
-            'fid': fid
-        }
-        subscriber = yield from Service.rooms.is_room_subscriber(data)
+    def is_room_subscriber(self, data):
+        uid = self.get_user()
+        data['uid'] = uid
+        subscriber, success, msg = yield from Service.subscribes.is_room_subscriber(data)
         if subscriber:
             return True
         else:
@@ -129,14 +120,11 @@ class BaseHandler(tornado.web.RequestHandler):
             self.finish(json.dumps(res))
             raise tornado.web.Finish()
 
-    def is_room_master_or_subscriber(self, rid):
-        fid = self.get_user()
-        data = {
-            'rid': rid,
-            'fid': fid
-        }
-        master = yield from Service.rooms.is_room_master(data)
-        subscriber = yield from Service.rooms.is_room_subscriber(data)
+    def is_room_master_or_subscriber(self, data):
+        uid = self.get_user()
+        data['uid'] = uid
+        master, success, msg = yield from Service.subscribes.is_room_master(data)
+        subscriber, success, msg = yield from Service.subscribes.is_room_subscriber(data)
         if master or subscriber:
             return True
         else:
@@ -147,9 +135,14 @@ class BaseHandler(tornado.web.RequestHandler):
             self.finish(json.dumps(res))
             raise tornado.web.Finish()
 
-    def db(self):
-        return self.application.db
-
+    def fid_to_uid(self, data):
+        user_id, success, msg = yield from Service.users.get_user_id(data)
+        if success:
+            data.pop('fid')
+            data['uid'] = user_id
+            return data
+        else:
+            return {}
 
 class Service:
     pass

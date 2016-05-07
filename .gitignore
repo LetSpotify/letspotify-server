@@ -10,6 +10,12 @@
 .idea/vcs.xml
 .idea/jsLibraryMappings.xml
 
+.idea/encodings.xml
+.idea/letspotify-server.iml
+.idea/misc.xml
+.idea/modules.xml
+
+
 # Sensitive or high-churn files:
 .idea/dataSources.ids
 .idea/dataSources.xml

@@ -1,50 +1,48 @@
 import logging
-import psycopg2
+import rethinkdb as r
 
 logger = logging.getLogger('letSpotify.' + __name__)
 
 DBERROR_MSG = "database error"
+DB_NO_ERR_MSG = ""
 
 
 class Users:
     def __init__(self, db):
         self.db = db
-
-    def check_user_exists(self, data):
-        sql = "SELECT count(*) FROM users WHERE fid = %s;"
-        result = yield self.db.execute(sql, (data['fid'],))
-        for i in result.fetchall():
-            if i[0] == 1:
-                return True
-            else:
-                return False
+        self.ur = r.table("users")
 
     def create_user(self, data):
-        sql = """
-               INSERT INTO users (name, access_token, locale, fid, session_expires)
-               VALUES (%s, %s, %s, %s, %s);
-               """
-        try:
-            yield self.db.execute(sql, (data['name'],
-                                        data['access_token'],
-                                        data['locale'],
-                                        int(data['fid']),
-                                        int(data['session_expires'])))
-            return True, True, ""
-        except Exception as e:
-            return False, False, DBERROR_MSG + str(e)
+        curs = yield (self.ur.get_all(data['fid'], index='fid').run(self.db))
+        if not (yield curs.fetch_next()):
+            yield (self.ur.insert(data).run(self.db))
+            return True, True, DB_NO_ERR_MSG
+        else:
+            return False, False, "User already created"
 
-    def get_info(self, data):
-        sql = """
-                SELECT name, locale, fid FROM users WHERE fid=%s;
-        """
-        try:
-            result = yield self.db.execute(sql, (data['fid'],))
-            res = {}
-            for i in result:
-                res['name'] = i[0]
-                res['locale'] = i[1]
-                res['fid'] = i[2]
-            return res, True, ""
-        except Exception as e:
-            return {}, False, DBERROR_MSG
+    def get_user(self, data):
+        user = yield (self.ur.get(data['uid']).run(self.db))
+        if user:
+            user.pop('access_token')
+            user.pop('session_expires')
+            user['fid'] = int(user['fid'])
+            return user, True, DB_NO_ERR_MSG
+        return {}, False, "can't find user"
+
+    def update_user(self, data):
+        curs = yield (self.ur.get_all(data['fid'], index='fid').run(self.db))
+        while (yield curs.fetch_next()):
+            user = yield curs.next()
+            res = yield self.ur.get(user['id']).update(data).run(self.db)
+            if res['replaced']:
+                return True, True, DB_NO_ERR_MSG
+            else:
+                return False, False, "can't update"
+        return False, False, "can't find user"
+
+    def get_user_id(self, data):
+        curs = yield (self.ur.get_all(data['fid'], index='fid').run(self.db))
+        while (yield curs.fetch_next()):
+            user = yield curs.next()
+            return user['id'], True, DB_NO_ERR_MSG
+        return "", False, "can't find user"

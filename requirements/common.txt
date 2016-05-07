@@ -2,3 +2,4 @@ tornado
 
 # Database
 momoko
+rethinkdb

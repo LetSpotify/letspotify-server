@@ -46,6 +46,12 @@ settings['cookie_secret'] = ""
 settings['xsrf_cookies'] = True
 settings['template_loader'] = tornado.template.Loader(TEMPLATE_ROOT)
 
+settings['root_url'] = ""
+settings["db_name"] = ""
+
+settings["facebook_api_key"] = ''
+settings["facebook_secret"] = ''
+
 SYSLOG_TAG = "letSpotify"
 SYSLOG_FACILITY = logging.handlers.SysLogHandler.LOG_LOCAL2
 
@@ -72,17 +78,5 @@ logconfig.initialize_logging(SYSLOG_TAG, SYSLOG_FACILITY, LOGGERS,
 if options.config:
     tornado.options.parse_config_file(options.config)
 
-DB_DATABASE = ''
-DB_USER = ''
-DB_PASSWORD = ''
-DB_HOST = ''
-DB_PORT = ''
-
-settings['dsn'] = 'dbname=%s user=%s password=%s host=%s port=%s' % (
-    DB_DATABASE, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
 
 
-settings["facebook_api_key"] = ''
-settings["facebook_secret"] = ''
-
-settings['root_url'] = ''
