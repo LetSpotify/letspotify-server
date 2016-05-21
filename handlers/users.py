@@ -11,6 +11,6 @@ class GetUserInfoHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
         user = self.get_user()
-        paras = {'uid': user}
+        paras = {'fid': user}
         user, success, msg = yield from Service.users.get_user(paras)
         self.api_response(user, success, msg)
