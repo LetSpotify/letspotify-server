@@ -21,7 +21,7 @@ class Users:
             return False, False, "User already created"
 
     def get_user(self, data):
-        user = yield (self.ur.get(data['uid']).run(self.db))
+        user = yield (self.ur.get(data['fid']).run(self.db))
         if user:
             user.pop('access_token')
             user.pop('session_expires')
