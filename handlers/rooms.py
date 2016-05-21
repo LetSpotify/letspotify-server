@@ -28,7 +28,7 @@ class RoomsDeleteHandler(BaseHandler):
             ('rid',)
         ]
         paras = self.get_parameters(para_q)
-        yield from self.is_room_master(paras['rid'])
+        yield from self.is_room_master(paras)
         rid, success, msg = yield from Service.rooms.delete_room(paras)
         self.api_response({}, success, msg)
 

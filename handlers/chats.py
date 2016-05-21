@@ -29,6 +29,6 @@ class ChatHandler(BaseHandler):
                     client.write_message(json.dumps(msg))
                     return self.api_response({}, True, "")
             else:
-                return self.api_response({}, False, "No people in this room")
+                return self.api_response({}, True, "No people in this room")
         else:
             return self.api_response({}, False, "Room Not Found")

@@ -87,7 +87,8 @@ class BaseHandler(tornado.web.RequestHandler):
         except:
             self.set_status(401)
             res = {
-                "error": "Unauthorized"
+                "msg": "Unauthorized",
+                "success": False
             }
             self.finish(json.dumps(res))
             raise tornado.web.Finish()
@@ -101,7 +102,8 @@ class BaseHandler(tornado.web.RequestHandler):
         else:
             self.set_status(403)
             res = {
-                "error": "You are not the master of this room"
+                "msg": "You are not the master of this room",
+                "success": False
             }
             self.finish(json.dumps(res))
             raise tornado.web.Finish()
@@ -115,7 +117,8 @@ class BaseHandler(tornado.web.RequestHandler):
         else:
             self.set_status(403)
             res = {
-                "error": "You are not the subscriber of this room"
+                "msg": "You are not the subscriber of this room",
+                "success": False
             }
             self.finish(json.dumps(res))
             raise tornado.web.Finish()
@@ -130,7 +133,8 @@ class BaseHandler(tornado.web.RequestHandler):
         else:
             self.set_status(403)
             res = {
-                "error": "You are not the master or subscriber of this room"
+                "msg": "You are not the master or subscriber of this room",
+                "success": False
             }
             self.finish(json.dumps(res))
             raise tornado.web.Finish()
