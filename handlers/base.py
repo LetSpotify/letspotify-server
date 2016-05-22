@@ -148,5 +148,12 @@ class BaseHandler(tornado.web.RequestHandler):
         else:
             return {}
 
+
+class HomeHandler(BaseHandler):
+    @tornado.gen.coroutine
+    def get(self):
+        return self.api_response({}, True, "")
+
+
 class Service:
     pass

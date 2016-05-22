@@ -1,3 +1,4 @@
+from handlers.base import HomeHandler
 from handlers.facebook_login import FacebookGraphLoginHandler
 from handlers.rooms import RoomsCreateHandler
 from handlers.rooms import RoomsDeleteHandler
@@ -16,6 +17,7 @@ from handlers.websocket import SocketHandler
 from handlers.chats import ChatHandler
 
 url_patterns = [
+    (r"/?", HomeHandler),
     (r"/auth/facebook/login/?", FacebookGraphLoginHandler),
     (r"/auth/token/create/?", TokenCreateHandler),
     (r"/auth/token/get/?", TokenGetHandler),
