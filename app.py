@@ -20,6 +20,7 @@ from lib.rooms import Rooms
 from lib.login_token import LoginToken
 from lib.subscribes import Subscribes
 from lib.ws_rooms import RoomClient
+from lib.room_token import RoomToken
 
 logger = logging.getLogger('letSpotify.' + __name__)
 
@@ -38,6 +39,7 @@ def main():
     db = yield r.connect(host='localhost', port=28015, db=settings['db_name'])
 
     Service.login_token = LoginToken(db)
+    Service.room_token = RoomToken(db)
     Service.users = Users(db)
     Service.rooms = Rooms(db)
     Service.subscribes = Subscribes(db)

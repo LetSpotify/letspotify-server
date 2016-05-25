@@ -15,6 +15,7 @@ from handlers.subscribes import RoomSubscriberListHandler
 from handlers.users import GetUserInfoHandler
 from handlers.websocket import SocketHandler
 from handlers.chats import ChatHandler
+from handlers.room_token import RoomTokenCreateHandler
 
 url_patterns = [
     (r"/?", HomeHandler),
@@ -31,6 +32,7 @@ url_patterns = [
     (r"/rooms/subscribe/?", UserSubscribeHandler),
     (r"/rooms/unsubscribe/?", UserUnsubscribeHandler),
     (r"/rooms/subscriber/?", RoomSubscriberListHandler),
+    (r"/rooms/token/?", RoomTokenCreateHandler),
     (r"/rooms/chat/?", ChatHandler),
     (r"/user/get/?", GetUserInfoHandler),
     (r"/user/rooms/get/?", UserRoomListHandler),
