@@ -13,8 +13,16 @@ class SocketHandler(websocket.WebSocketHandler):
     @tornado.gen.coroutine
     def open(self):
         rid = self.get_argument("rid", "")
-        logger.info("new client: rid = %s" % rid)
+        logger.debug("new client: rid = %s" % rid)
         Service.ws_rooms.add_client(rid, self)
+        msg = {
+            "type": "info",
+            "data": {
+                'rid': rid,
+                'join': True
+            }
+        }
+        self.write_message(json.dumps(msg))
 
     @tornado.gen.coroutine
     def on_message(self, message):
@@ -23,5 +31,5 @@ class SocketHandler(websocket.WebSocketHandler):
     @tornado.gen.coroutine
     def on_close(self):
         rid = self.get_argument("rid", "")
-        logger.info("remove client: rid = %s" % rid)
+        logger.debug("remove client: rid = %s" % rid)
         Service.ws_rooms.delete_client(rid, self)
