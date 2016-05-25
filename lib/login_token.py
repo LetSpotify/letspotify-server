@@ -44,3 +44,15 @@ class LoginToken:
             return {}, False, "Data not changed"
         else:
             return {}, False, "Unexpected error"
+
+    def delete_token(self, data):
+        res = (yield self.tk.get(data['token']).delete().run(self.db))
+        logger.debug(res)
+        if res['deleted']:
+            return {}, True, DB_NO_ERR_MSG
+        elif res['skipped']:
+            return {}, False, "No Token Found"
+        elif res['unchanged']:
+            return {}, False, "Data not changed"
+        else:
+            return {}, False, "Unexpected error"

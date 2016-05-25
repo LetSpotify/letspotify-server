@@ -10,6 +10,9 @@ class TokenCreateHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
         token, success, msg = yield from Service.login_token.create_token()
+        data = {
+            'token': token
+        }
         self.api_response({"token": token}, success, msg)
 
 
@@ -37,9 +40,8 @@ class TokenGetCookieHandler(BaseHandler):
         else:
             if token_data['login'] and not token_data['cookie']:
                 self.set_secure_cookie("user", str(token_data['uid']))
-                token_data['cookie'] = True
-                updated, success, msg = yield from Service.login_token.update_token(token_data)
-                self.api_response({"updated": updated}, success, msg)
+                updated, success, msg = yield from Service.login_token.delete_token(token_data)
+                self.api_response({}, success, msg)
             elif not token_data['login']:
                 self.api_response({}, False, "token is not login yet")
             elif token_data['cookie']:
