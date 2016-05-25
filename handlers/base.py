@@ -152,7 +152,7 @@ class BaseHandler(tornado.web.RequestHandler):
 class HomeHandler(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
-        return self.api_response({}, True, "")
+        self.api_response({}, True, "")
 
 
 class Service:
