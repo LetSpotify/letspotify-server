@@ -17,6 +17,7 @@ ROOMS_SUBSCRIBE = "/rooms/subscribe/"
 ROOMS_UNSUBSCRIBE = "/rooms/unsubscribe/"
 ROOMS_SUBSCRIBER = "/rooms/subscriber/"
 ROOMS_CHAT = "/rooms/chat/"
+ROOMS_TOKEN = "/rooms/token/"
 USER_GET = "/user/get/"
 USER_ROOMS_GET = "/user/rooms/get/"
 
@@ -26,6 +27,7 @@ class SimpleTest:
         self.cookies = None
         self.token = None
         self.room = {}
+        self.room_token = None
 
     def test_token_create(self):
         res = r.get(BASE_URL+TOKEN_CREATE)
@@ -130,6 +132,13 @@ class SimpleTest:
         j = json.loads(res.text)
         assert j['success']
 
+    def test_rooms_token(self):
+        data = {'rid': self.room['id']}
+        res = r.get(BASE_URL + ROOMS_TOKEN, cookies=self.cookies, data=data)
+        j = json.loads(res.text)
+        self.room_token = j['data']['token']
+        assert j['success']
+
     def test_user_get(self):
         res = r.get(BASE_URL + USER_GET, cookies=self.cookies)
         j = json.loads(res.text)
@@ -148,6 +157,9 @@ test.test_facebook_login()
 test.test_token_cookie()
 test.test_rooms_create()
 test.test_rooms_get()
+test.test_rooms_token()
+print("rid=%s&token=%s" % (test.room['id'], test.room_token))
+input("wait to join room")
 test.test_player_update()
 test.test_rooms_subscribe()
 test.test_rooms_subscriber()
