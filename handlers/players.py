@@ -29,7 +29,7 @@ class RoomsPlayerSendHandler(BaseHandler):
                 for client in clients:
                     msg = {
                         "type": "player",
-                        "msg": paras
+                        "data": paras
                     }
                     client.write_message(json.dumps(msg))
                     return self.api_response({}, True, "")
